@@ -20,6 +20,17 @@ This makes Soma practical to run continuously. It isn't burning tokens every cyc
 
 ---
 
+## Who is this for?
+
+- **Developers building personal AI systems** who want background reasoning without designing a cognitive architecture from scratch
+- **AI assistant developers** who want their system to persist knowledge and detect patterns between sessions
+- **Researchers** interested in zero-token reasoning architectures as an alternative to pure RAG
+- **Anyone frustrated** that their AI "forgets everything" — this is the infrastructure layer that fixes that
+
+If you're looking for a plug-and-play memory widget, this isn't it. If you want to understand how a persistent reasoning layer works and adapt it to your system, this is for you.
+
+---
+
 ## Architecture
 
 Six layers, each building on the last. The first five can run without any LLM.
@@ -108,6 +119,21 @@ flowchart TD
 
 **`src/layers/continuity-tracker.js`** — Optional: measures whether topology change is accumulating around a specific node over time. Useful for tracking how work on a particular question deepens the graph around it.
 
+**Example briefing (what Soma reports when you return):**
+```
+Soma — 4h 23m since last session
+
+New since you left:
+  • 3 new inferences from knowledge graph cycle
+  • Pattern detected: "auth middleware" mentioned in 4 separate sessions this week
+  • GitHub: 2 new issues on your repo (both labeled "question")
+  • 1 reasoning thread warming up: "refactor vs rewrite decision" — connected to 6 nodes
+
+Active questions Soma is tracking:
+  • What's blocking the mobile auth flow? (no resolution in 3 sessions)
+  • Is the pattern-engine overlap with the reasoner intentional?
+```
+
 ### Layer 5: External Sensing (zero tokens)
 
 All sensors buffer through `src/sensors/intake-buffer.js` before ingestion into the knowledge graph.
@@ -156,6 +182,8 @@ This architecture means Soma never interrupts active work, never creates resourc
 ---
 
 ## Getting started
+
+**Dependencies:** Zero npm dependencies for core reasoning. Claude CLI is required for LLM escalation (get it at claude.ai/code). Grok API key optional — system works Claude-only. Node.js 18+ required.
 
 **Requirements:** Node.js 18+, Claude CLI on PATH (or configured via `soma.config.js`)
 
@@ -270,6 +298,17 @@ The distinction matters. Most AI systems conflate identity, interface, and reaso
 The design was motivated by a specific observation: Claude knows what happened last session because it reads session files. But it hasn't been *thinking* about the work. Soma exists to fill that gap — to do the background reasoning, pattern detection, and synthesis that makes a returning AI feel like it was actually present, not just briefed.
 
 The knowledge graph persists. The patterns accumulate. The questions don't disappear when the chat window closes.
+
+---
+
+## Contributing
+
+The most useful contributions right now:
+- **Sensor implementations** for new data sources (Discord, email, calendar)
+- **Cross-platform testing** — the codebase runs on Windows; Linux/Mac testing welcome
+- **Alternative LLM backends** — the tool interface in `src/tools/` is designed for substitution
+
+Open an issue before large PRs. The architecture is intentional — changes to the layer boundaries need discussion.
 
 ---
 

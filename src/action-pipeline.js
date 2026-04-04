@@ -21,6 +21,16 @@ const path = require('path');
 const { execSync } = require('child_process');
 const { addNotification } = require('./tools/session-lock');
 
+// Validate project paths at initialization to prevent shell injection.
+// Paths must contain only safe characters — rejects semicolons, backticks,
+// dollar signs, and other shell metacharacters.
+function validateProjectPath(p) {
+  if (!/^[a-zA-Z0-9_\-\/\\.:\s]+$/.test(p)) {
+    throw new Error(`Invalid project path: ${p} — contains disallowed characters`);
+  }
+  return p;
+}
+
 let _config = {};
 try { _config = require('../../soma.config.js'); } catch (_) {}
 
@@ -37,7 +47,7 @@ class ActionPipeline {
     this.projectPaths = {};
     for (const proj of configuredProjects) {
       if (proj.id && proj.path) {
-        this.projectPaths[proj.id] = proj.path;
+        this.projectPaths[proj.id] = validateProjectPath(proj.path);
       }
     };
     // Cache parsed nav pages per project to avoid re-reading every cycle
@@ -744,31 +754,30 @@ class ActionPipeline {
       stdio: ['pipe', 'pipe', 'pipe']
     };
 
-    // Stage files
+    // Stage files — use array form with shell: false to prevent injection
     for (const file of files) {
-      execSync(`git add "${file}"`, opts);
+      execSync(['git', 'add', '--', file], { ...opts, shell: false });
     }
 
     // Check if there are actually staged changes
-    const status = execSync('git status --porcelain', opts).trim();
+    const status = execSync(['git', 'status', '--porcelain'], { ...opts, shell: false }).trim();
     if (!status) {
       return { hash: null, pushed: false };
     }
 
-    // Commit
-    const escapedMsg = message.replace(/"/g, '\\"');
-    execSync(`git commit -m "${escapedMsg}"`, opts);
+    // Commit — array form keeps the message literal, no escaping needed
+    execSync(['git', 'commit', '-m', message], { ...opts, shell: false });
 
     // Get the commit hash
-    const hash = execSync('git rev-parse --short HEAD', opts).trim();
+    const hash = execSync(['git', 'rev-parse', '--short', 'HEAD'], { ...opts, shell: false }).trim();
 
     // Get current branch
-    const branch = execSync('git branch --show-current', opts).trim();
+    const branch = execSync(['git', 'branch', '--show-current'], { ...opts, shell: false }).trim();
 
-    // Push
+    // Push — branch name comes from git itself (safe), but keep array form for consistency
     let pushed = false;
     try {
-      execSync(`git push origin ${branch}`, opts);
+      execSync(['git', 'push', 'origin', branch], { ...opts, shell: false });
       pushed = true;
     } catch (pushErr) {
       console.error(`[ActionPipeline] Push failed: ${pushErr.message}`);
