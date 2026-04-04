@@ -23,9 +23,29 @@ const HISTORY_FILE = process.env.SOMA_HISTORY_FILE ||
   path.join(process.env.HOME || process.env.USERPROFILE || '', '.claude', 'history.jsonl');
 const OUTPUT_FILE = path.join(DATA_DIR, 'history_analysis.json');
 
+// ---------------------------------------------------------------------------
+// HOST SERVER DEPENDENCY NOTE
+// ---------------------------------------------------------------------------
+// This module optionally posts analysis results (thoughtstream entries,
+// attention events) to a host web server layer that exposes the Soma/Cortex
+// REST API (e.g., the Cortex Command Center at web/server.js).
+//
+// In standalone Soma (without a host web layer), this module is OPTIONAL:
+//   - Run with `--no-post` to perform analysis only, skipping all HTTP posts.
+//   - If the server is unreachable, each post call is caught and logged as
+//     SKIPPED — the analysis itself still completes and writes to disk.
+//
+// Server location is configurable via environment variables or soma.config.js:
+//   SOMA_HOST   — hostname of the host web server  (default: 'localhost')
+//   SOMA_PORT   — port of the host web server       (default: 3142)
+//
+// In soma.config.js:
+//   module.exports = { port: 3142, server: { host: 'localhost', port: 3142 } }
+// ---------------------------------------------------------------------------
+
 // Soma API server (if running alongside a web server for thoughtstream posting)
-const SOMA_HOST = process.env.SOMA_HOST || 'localhost';
-const SOMA_PORT = parseInt(process.env.SOMA_PORT || (_config.port || 3142), 10);
+const SOMA_HOST = process.env.SOMA_HOST || _config.server?.host || 'localhost';
+const SOMA_PORT = parseInt(process.env.SOMA_PORT || _config.server?.port || _config.port || 3142, 10);
 
 // ---------------------------------------------------------------------------
 // Helpers

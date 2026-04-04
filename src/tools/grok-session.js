@@ -8,14 +8,14 @@
 const crypto = require('crypto');
 const path = require('path');
 
-// Resolve grok-client relative to this file's location.
-// Expected at: <soma-root>/grok-client.js or configure via soma.config.js
+// Resolve grok-client: use soma.config.js override if provided,
+// otherwise fall back to the bundled client in this same directory.
 let _grokClientPath = null;
 try {
   const cfg = require('../../soma.config.js');
   if (cfg.llm?.grok?.clientPath) _grokClientPath = cfg.llm.grok.clientPath;
 } catch (_) {}
-const GROK_CLIENT_PATH = _grokClientPath || path.join(__dirname, '..', '..', 'grok-client.js');
+const GROK_CLIENT_PATH = _grokClientPath || path.join(__dirname, './grok-client.js');
 const { streamGrokChat } = require(GROK_CLIENT_PATH);
 
 const DEFAULT_MODEL = 'grok-3-mini';

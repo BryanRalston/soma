@@ -2246,7 +2246,7 @@ class SomaDaemon {
       const cycleNum = this.cycleCount;
 
       // How long since the user was last active
-      const elapsedSinceBryan = this._elapsedSinceUser();
+      const elapsedSinceUser = this._elapsedSinceUser();
 
       // Warmth changes from sleep state
       const warmthChanges = this._readWarmthChanges();
@@ -2262,7 +2262,7 @@ class SomaDaemon {
       const narrative = this._buildNarrative({
         cycleNum,
         cycleType,
-        elapsedSinceBryan,
+        elapsedSinceUser,
         warmthChanges,
         nodeCount,
         edgeCount,
@@ -2276,7 +2276,7 @@ class SomaDaemon {
         timestamp: new Date(now).toISOString(),
         cycleType,
         cycleNum,
-        elapsedSinceBryan,
+        elapsedSinceUser,
         backend: backendUsed,
         narrative,
         warmthChanges,
@@ -2354,17 +2354,17 @@ class SomaDaemon {
    * Construct a first-person narrative from cycle data.
    * No LLM. Pure template logic with conditional sentences.
    */
-  _buildNarrative({ cycleNum, cycleType, elapsedSinceBryan, warmthChanges, nodeCount, edgeCount, deepThinkSummary, backendUsed, questionStats }) {
+  _buildNarrative({ cycleNum, cycleType, elapsedSinceUser, warmthChanges, nodeCount, edgeCount, deepThinkSummary, backendUsed, questionStats }) {
     const parts = [];
     const isDeep = cycleType === 'deep-think';
 
     // Opening: cycle identification
     const typeLabel = isDeep ? `(deep think${backendUsed && backendUsed !== 'none' ? `, ${backendUsed}` : ''})` : '';
-    const awayStr = elapsedSinceBryan === 'active'
+    const awayStr = elapsedSinceUser === 'active'
       ? 'User is here'
-      : elapsedSinceBryan === 'unknown'
+      : elapsedSinceUser === 'unknown'
         ? 'Last session time unknown'
-        : `User last active ${elapsedSinceBryan} ago`;
+        : `User last active ${elapsedSinceUser} ago`;
 
     parts.push(`Cycle ${cycleNum}${typeLabel ? ' ' + typeLabel : ''}. ${awayStr}.`);
 
@@ -2472,8 +2472,8 @@ class SomaDaemon {
     for (const e of mdEntries) {
       const dateStr = this._formatCycleDate(e.timestamp);
       const typeLabel = e.cycleType === 'deep-think' ? ' (deep think)' : '';
-      const awayStr = e.elapsedSinceBryan && e.elapsedSinceBryan !== 'unknown' && e.elapsedSinceBryan !== 'active'
-        ? ` — ${e.elapsedSinceBryan} since last session`
+      const awayStr = e.elapsedSinceUser && e.elapsedSinceUser !== 'unknown' && e.elapsedSinceUser !== 'active'
+        ? ` — ${e.elapsedSinceUser} since last session`
         : '';
       mdLines.push(`## Cycle ${e.cycleNum}${typeLabel} — ${dateStr}${awayStr}`);
       mdLines.push(e.narrative);
