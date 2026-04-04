@@ -1,5 +1,5 @@
 // ============================================================
-// CORTEX CORE — Knowledge Graph
+// SOMA CORE — Knowledge Graph
 // The foundation. Everything else reasons over this.
 // ============================================================
 

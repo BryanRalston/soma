@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // ============================================================
-// CORTEX CORE — First Boot (Deep Initialization)
+// SOMA CORE — First Boot (Deep Initialization)
 // One-time script to connect the 730+ orphan nodes, run
 // inference, detect patterns, and generate insights.
 // ============================================================
@@ -18,7 +18,7 @@ function elapsed(startMs) {
 async function firstBoot() {
   const t0 = Date.now();
   console.log(DIVIDER);
-  console.log('  CORTEX CORE — FIRST BOOT (Deep Initialization)');
+  console.log('  SOMA CORE — FIRST BOOT (Deep Initialization)');
   console.log(DIVIDER);
   console.log(`  Started: ${new Date().toISOString()}\n`);
 

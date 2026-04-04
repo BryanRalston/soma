@@ -1,5 +1,5 @@
 // ============================================================
-// CORTEX CORE — LLM Tool
+// SOMA CORE — LLM Tool
 // Claude (or any LLM) as a pluggable tool.
 // Not the brain. A capability the brain can call.
 // ============================================================
@@ -118,14 +118,14 @@ function createComposerTool(composer) {
         return {
           text: composer.answerFromKnowledge(prompt),
           tokensUsed: 0,
-          source: 'cortex-composer'
+          source: 'soma-composer'
         };
       }
 
       return {
         text: composer.compose({ type, data: input.data || {}, query: prompt }),
         tokensUsed: 0,
-        source: 'cortex-composer'
+        source: 'soma-composer'
       };
     }
   };

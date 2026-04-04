@@ -1,5 +1,5 @@
 // ============================================================
-// CORTEX CORE — Tool Registry
+// SOMA CORE — Tool Registry
 // Pluggable tool system. Claude is just one tool among many.
 // ============================================================
 

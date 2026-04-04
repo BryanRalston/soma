@@ -21,11 +21,11 @@ const readline = require('readline');
 // ---------------------------------------------------------------------------
 
 const CLAUDE_PROJECTS_DIR = path.join(
-  process.env.USERPROFILE || process.env.HOME || 'C:/Users/bryan',
+  process.env.USERPROFILE || process.env.HOME || path.join(require('os').homedir()),
   '.claude', 'projects'
 );
 const HISTORY_FILE = path.join(
-  process.env.USERPROFILE || process.env.HOME || 'C:/Users/bryan',
+  process.env.USERPROFILE || process.env.HOME || path.join(require('os').homedir()),
   '.claude', 'history.jsonl'
 );
 
@@ -54,7 +54,7 @@ const STOPWORDS = new Set([
 /** Derive a short project name from a path or encoded directory name. */
 function deriveProjectName(rawPath) {
   if (!rawPath) return 'unknown';
-  // Encoded dir names: C--Cortex, C--UnityProjects-Brix3D
+  // Encoded dir names: C--MyProject, C--UnityProjects-MyGame
   const normalized = rawPath.replace(/\\/g, '/').replace(/\/+$/, '');
   const parts = normalized.split('/').filter(Boolean);
   return parts[parts.length - 1] || 'unknown';

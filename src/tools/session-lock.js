@@ -3,7 +3,7 @@
 // Layer 1: User session registry (multiple concurrent allowed)
 // Layer 2: Background lock (mutually exclusive: soma / action-router)
 // Shared by: server.js (user chat), daemon.js (Soma),
-//            action_router.js (Parallax), ClaudeSession
+//            action-pipeline.js, ClaudeSession
 // ============================================================
 
 const fs = require('fs');
@@ -87,7 +87,7 @@ function isPidRunning(pid) {
  * Register a user session. Multiple allowed concurrently.
  * @param {string} id - Session identifier (e.g., "s-abc123")
  * @param {number} pid - Process ID of the user's Claude Code terminal
- * @param {string} project - Project context (e.g., "cortex", "brix3d")
+ * @param {string} project - Project context (e.g., "my-project", "my-app")
  * @returns {object} The registered session entry
  */
 function registerSession(id, pid, project) {

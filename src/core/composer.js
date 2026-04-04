@@ -1,5 +1,5 @@
 // ============================================================
-// CORTEX CORE — Composer
+// SOMA CORE — Composer
 // Response assembly without an LLM.
 // Retrieval + templates + knowledge graph reasoning.
 // ============================================================

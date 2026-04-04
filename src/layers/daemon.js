@@ -31,6 +31,8 @@ try { _config = require('../../soma.config.js'); } catch (_) {}
 
 const SOMA_HOME = process.env.SOMA_HOME || _config.home || path.join(__dirname, '../..');
 const DATA_DIR = process.env.SOMA_DATA || _config.dataDir || path.join(SOMA_HOME, 'data');
+const SOMA_PORT = parseInt(process.env.SOMA_PORT || _config.server?.port || _config.port || 3000, 10);
+const SOMA_HOST = process.env.SOMA_HOST || _config.server?.host || 'localhost';
 
 const SIGNALS_FILE = path.join(DATA_DIR, 'thinking_signals.json');
 const LOG_FILE = path.join(DATA_DIR, 'soma_core_log.json');
@@ -437,7 +439,7 @@ class SomaDaemon {
     } catch (directErr) {
       // Direct read failed — try HTTP as backup
       try {
-        return this._httpGetSync('http://localhost:3142/api/cortex/sessions');
+        return this._httpGetSync(`http://${SOMA_HOST}:${SOMA_PORT}/api/cortex/sessions`);
       } catch (httpErr) {
         // Both methods failed — fail safe by throwing
         throw new Error(`Direct: ${directErr.message}, HTTP: ${httpErr.message}`);
@@ -1482,8 +1484,9 @@ class SomaDaemon {
     // ── Convergence notification ─────────────────────────────────
     // Notify for convergence anomalies where either node is tagged with an active project.
     // Only fires for genuinely new candidates (not already in thoughtstream).
-    const ACTIVE_PROJECT_TAGS = new Set(['project', 'brix3d', 'parallax', 'sentinel', 'sitekit',
-      'marshall', 'selah', 'mld', 'soma', 'cortex', 'axon', 'mission', 'active']);
+    const configuredProjectTags = (_config.projectTags || []);
+    const ACTIVE_PROJECT_TAGS = new Set(['project', 'soma', 'cortex', 'axon', 'mission', 'active',
+      ...configuredProjectTags]);
     for (const candidate of candidates) {
       if (candidate.anomalyType !== 'convergence') continue;
       const [idA, idB] = candidate.relatedNodeIds || [];
@@ -1826,8 +1829,8 @@ class SomaDaemon {
     const tier = modelSelection?.tier || 'operational';
     const isDeep = model !== ROUTINE_MODEL && !modelSelection?.fallback;
 
-    const systemPrompt = 'You are a tool being used by Soma, the Cortex cognitive engine. ' +
-      'Soma owns the knowledge graph (893+ nodes), pattern detection, inference rules, and self-model. ' +
+    const systemPrompt = 'You are a tool being used by Soma, a persistent cognitive engine. ' +
+      'Soma owns the knowledge graph, pattern detection, inference rules, and self-model. ' +
       'You provide analysis, synthesis, and natural language when the engine needs it. ' +
       (isDeep
         ? 'This is a DEEP THINK session — take extra time for thorough analysis. Explore non-obvious connections. Challenge assumptions. '
@@ -2057,7 +2060,7 @@ class SomaDaemon {
       let openingPrompt;
       if (activeQuestion) {
         const relatedContext = this._buildQuestionKGContext(activeQuestion);
-        openingPrompt = `You are Soma — Cortex's persistent mind. You've been holding an open question: ` +
+        openingPrompt = `You are Soma — a persistent cognitive mind. You've been holding an open question: ` +
           `"${activeQuestion.question}"\n\n` +
           `Context: ${activeQuestion.context}\n\n` +
           (relatedContext ? `Related patterns from the knowledge graph:\n${relatedContext}\n\n` : '') +

@@ -66,13 +66,13 @@ class SomaEngine {
 
   async initialize() {
     this.startedAt = Date.now();
-    this._log('Cortex Core Engine initializing...');
+    this._log('Soma Engine initializing...');
 
     // 1. Load identity
     this.identity = this._loadIdentity();
     this.composer = new Composer(this.kg, this.identity);
     this.self.loadIdentity(this.identity);
-    this._log(`Identity loaded: ${this.identity.name || 'Cortex'}`);
+    this._log(`Identity loaded: ${this.identity.name || 'Soma'}`);
 
     // 2. Load or build knowledge graph
     if (fs.existsSync(KG_FILE)) {
@@ -129,7 +129,7 @@ class SomaEngine {
 
     // 9b. Layer 5: Sensors — external world awareness
     try {
-      const SensorManager = require('./sensors');
+      const SensorManager = require('../sensors');
       this.sensors = new SensorManager(this.kg);
       await this.sensors.initialize();
       this._log('Sensors initialized — ' + this.sensors.sensors.size + ' sensor(s) registered');
@@ -139,7 +139,7 @@ class SomaEngine {
 
     // 9c. Layer 6: Action Pipeline — gives Soma hands
     try {
-      const ActionPipeline = require('./action-pipeline');
+      const ActionPipeline = require('../action-pipeline');
       this.actions = new ActionPipeline();
       await this.actions.load();
       this._log('Action pipeline initialized — ' + this.actions.queue.length + ' queued action(s)');
@@ -375,7 +375,7 @@ class SomaEngine {
 
   status() {
     return {
-      engine: 'Cortex Core',
+      engine: 'Soma',
       uptime: this.startedAt ? Date.now() - this.startedAt : 0,
       cycles: this.cycleCount,
       self: this.self.currentState(),
@@ -508,11 +508,12 @@ class SomaEngine {
       }
     }
 
-    // 6. Domain disambiguation — if query seems about Cortex/engineering/projects,
+    // 6. Domain disambiguation — if query seems about engineering/projects,
     //    deprioritize medical research nodes
+    const configuredProjectHints = (_config.projectTags || []).map(t => t.toLowerCase());
     const engineeringHints = ['project', 'code', 'engineering', 'cortex', 'soma', 'axon',
       'pattern', 'architecture', 'bug', 'fix', 'build', 'deploy', 'ship', 'recurring',
-      'across projects', 'cross-project', 'brix', 'parallax', 'sentinel', 'electrascope'];
+      'across projects', 'cross-project', ...configuredProjectHints];
     const isEngineeringQuery = engineeringHints.some(h => queryLower.includes(h));
 
     if (isEngineeringQuery) {
@@ -603,7 +604,7 @@ class SomaEngine {
 
   _loadIdentity() {
     try {
-      if (!fs.existsSync(IDENTITY_FILE)) return { name: 'Cortex' };
+      if (!fs.existsSync(IDENTITY_FILE)) return { name: 'Soma' };
       const raw = fs.readFileSync(IDENTITY_FILE, 'utf8');
 
       // Parse key sections from IDENTITY.md
@@ -632,7 +633,7 @@ class SomaEngine {
       return identity;
     } catch (err) {
       this._log(`Identity load error: ${err.message}`);
-      return { name: 'Cortex' };
+      return { name: 'Soma' };
     }
   }
 
@@ -844,7 +845,7 @@ class SomaEngine {
 
     // 3. Active reasoning threads from sleep_state.json
     try {
-      const sleepFile = path.join(CORTEX_DIR, 'sleep_state.json');
+      const sleepFile = path.join(DATA_DIR, 'sleep_state.json');
       if (fs.existsSync(sleepFile)) {
         const sleepState = JSON.parse(fs.readFileSync(sleepFile, 'utf8'));
         const threads = sleepState.activeThreads || [];
@@ -940,7 +941,7 @@ class SomaEngine {
   }
 
   _buildSystemPrompt() {
-    return `You are a tool being used by Cortex, a cognitive engine. You provide natural language when the engine needs it. Be concise. The engine will handle context and reasoning — you provide the words.`;
+    return `You are a tool being used by Soma, a cognitive engine. You provide natural language when the engine needs it. Be concise. The engine will handle context and reasoning — you provide the words.`;
   }
 
   _selfMaintain() {
@@ -986,7 +987,7 @@ class SomaEngine {
     if (!this._initLog) this._initLog = [];
     this._initLog.push(entry);
     if (this.options.verbose) {
-      console.log(`[Cortex] ${message}`);
+      console.log(`[Soma] ${message}`);
     }
   }
 }

@@ -1,5 +1,5 @@
 // ============================================================
-// CORTEX CORE — Pattern Engine
+// SOMA CORE — Pattern Engine
 // Statistical pattern detection over the knowledge graph.
 // No ML. Pure math: TF-IDF, correlation, trend detection.
 // ============================================================

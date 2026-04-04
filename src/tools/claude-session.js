@@ -67,7 +67,7 @@ class ClaudeSession {
   _inferLockHolder() {
     const r = (this.reason || '').toLowerCase();
     if (r.includes('soma') || r.includes('think')) return 'soma';
-    if (r.includes('action') || r.includes('router') || r.includes('parallax')) return 'action-router';
+    if (r.includes('action') || r.includes('router') || r.includes('pipeline')) return 'action-router';
     return 'soma'; // default for background sessions
   }
 

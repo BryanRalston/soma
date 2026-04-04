@@ -256,7 +256,7 @@ function measureBriefingProbability(centerNodeId = THE_QUESTION_ID) {
   // Factor 6: Sleep system warmth (is the thread actively held?)
   let sleepWarmth = 0;
   try {
-    const sleepFile = path.join(CORTEX_DIR, 'sleep_state.json');
+    const sleepFile = path.join(DATA_DIR, 'sleep_state.json');
     if (fs.existsSync(sleepFile)) {
       const sleepData = JSON.parse(fs.readFileSync(sleepFile, 'utf8'));
       const thread = (sleepData.activeThreads || []).find(t => t.thoughtId === centerNodeId);

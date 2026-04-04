@@ -177,7 +177,7 @@ async function runREPL(engine) {
   });
 
   const state = engine.self.currentState();
-  console.log(`\n${engine.identity.name || 'Cortex'} Core — Interactive Mode`);
+  console.log(`\n${engine.identity.name || 'Soma'} Core — Interactive Mode`);
   console.log(`${state.knowledge.nodes || 0} nodes | ${state.mood} | Type /help for commands\n`);
 
   const prompt = () => {
@@ -232,7 +232,7 @@ async function runREPL(engine) {
         const t0 = Date.now();
         const result = await engine.reflect();
         const output = result.phases?.act?.output || 'No insights.';
-        console.log(`\ncortex > ${output}\n`);
+        console.log(`\nsoma >${output}\n`);
         console.log(`  (${Date.now() - t0}ms, source: ${result.phases?.act?.source || '?'})\n`);
         return prompt();
       }
@@ -240,14 +240,14 @@ async function runREPL(engine) {
       if (input === '/patterns') {
         const analysis = engine.patterns.analyze();
         const report = engine.composer.composePatternReport({ ...analysis, windowDays: 30 });
-        console.log(`\ncortex > ${report}\n`);
+        console.log(`\nsoma >${report}\n`);
         return prompt();
       }
 
       if (input === '/insights') {
         const insights = engine.reasoner.generateInsights();
         if (insights.length === 0) {
-          console.log('\ncortex > No insights at this time.\n');
+          console.log('\nsoma >No insights at this time.\n');
         } else {
           for (const i of insights.slice(0, 5)) {
             console.log(`\n  [${i.priority}] ${i.type}: ${i.content}`);
@@ -262,9 +262,9 @@ async function runREPL(engine) {
         const q = input.slice(8).trim();
         const results = engine.search(q, 5);
         if (results.length === 0) {
-          console.log(`\ncortex > No results for "${q}"\n`);
+          console.log(`\nsoma >No results for "${q}"\n`);
         } else {
-          console.log(`\ncortex > ${results.length} results for "${q}":`);
+          console.log(`\nsoma >${results.length} results for "${q}":`);
           for (const r of results) {
             console.log(`  [${(r.relevance || 0).toFixed(2)}] ${r.node?.title || r.id}`);
           }
@@ -275,7 +275,7 @@ async function runREPL(engine) {
 
       if (input === '/save') {
         engine.save();
-        console.log('\ncortex > Knowledge graph saved.\n');
+        console.log('\nsoma >Knowledge graph saved.\n');
         return prompt();
       }
 
@@ -283,7 +283,7 @@ async function runREPL(engine) {
       const t0 = Date.now();
       const result = await engine.query(input);
       const output = result.phases?.act?.output || 'No response.';
-      console.log(`\ncortex > ${output}`);
+      console.log(`\nsoma >${output}`);
       console.log(`\n  (${Date.now() - t0}ms, source: ${result.phases?.act?.source || '?'})\n`);
       prompt();
     });

@@ -237,7 +237,7 @@ class Briefing {
 
   _getPendingSignals() {
     try {
-      const signalsFile = path.join(CORTEX_DIR, 'thinking_signals.json');
+      const signalsFile = path.join(DATA_DIR, 'thinking_signals.json');
       if (!fs.existsSync(signalsFile)) return [];
       const raw = JSON.parse(fs.readFileSync(signalsFile, 'utf8'));
       const signals = Array.isArray(raw) ? raw : (raw.signals || []);

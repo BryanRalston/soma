@@ -1,5 +1,5 @@
 // ============================================================
-// CORTEX CORE — Reasoner
+// SOMA CORE — Reasoner
 // Inference engine. Draws conclusions from the knowledge graph.
 // Forward chaining, backward chaining, contradiction detection.
 // ============================================================

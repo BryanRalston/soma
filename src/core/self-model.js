@@ -1,5 +1,5 @@
 // ============================================================
-// CORTEX CORE — Self Model
+// SOMA CORE — Self Model
 // Genuine introspection. Not performed. Computed.
 // Knows what it is, what it can do, what it can't, what's
 // happening inside it right now.
@@ -255,7 +255,7 @@ class SelfModel {
     const tools = state.tools;
 
     return {
-      identity: this.identity.name || 'Cortex Core',
+      identity: this.identity.name || 'Soma',
       nature: 'Cognitive engine — knowledge graph reasoning with pluggable tools',
       notAnLLM: true,
       whatICanDo: [
