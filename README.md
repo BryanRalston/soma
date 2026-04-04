@@ -189,7 +189,7 @@ This architecture means Soma never interrupts active work, never creates resourc
 
 ```bash
 # Clone
-git clone https://github.com/your-username/soma.git
+git clone https://github.com/bryanralston/soma.git
 cd soma
 
 # Configure
