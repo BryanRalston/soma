@@ -1,0 +1,22 @@
+# Runtime data — never commit personal knowledge
+data/*.json
+!package.json
+!soma.config.example.js
+
+# Keep the data directory stub in git
+!data/.gitkeep
+!data/README.md
+
+# Config with your personal details
+soma.config.js
+
+# Dependencies
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*

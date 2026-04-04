@@ -1,0 +1,28 @@
+{
+  "name": "soma-cognitive-engine",
+  "version": "0.1.0",
+  "description": "Autonomous background cognition engine for AI systems. Persistent knowledge graph, layered reasoning, cost-aware LLM escalation.",
+  "main": "src/core/index.js",
+  "scripts": {
+    "start": "node src/core/index.js loop",
+    "pulse": "node src/layers/pulse.js",
+    "status": "node src/core/index.js status",
+    "repl": "node src/core/index.js repl",
+    "sleep": "node src/layers/sleep.js",
+    "briefing": "node src/core/index.js briefing"
+  },
+  "keywords": [
+    "ai",
+    "knowledge-graph",
+    "reasoning",
+    "autonomous-agent",
+    "cognitive-architecture",
+    "llm",
+    "background-cognition"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {}
+}
