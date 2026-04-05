@@ -81,10 +81,14 @@ function requireAdmin(req, res, next) {
     return next();
   }
 
-  // Already attached from requireApiKey?
+  // Already attached from requireApiKey as admin?
   if (req.auth?.isAdmin) return next();
 
-  res.status(401).json({ error: { code: 'ADMIN_REQUIRED', message: 'Admin key required.' } });
+  // Check if they have a valid (non-admin) API key — 403 if so, 401 if not
+  const hasValidApiKey = !!lookupApiKey(token);
+  const status = hasValidApiKey ? 403 : 401;
+  const code = hasValidApiKey ? 'FORBIDDEN' : 'ADMIN_REQUIRED';
+  res.status(status).json({ error: { code, message: 'Admin key required.' } });
 }
 
 /**
