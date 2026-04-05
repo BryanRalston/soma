@@ -72,6 +72,18 @@ module.exports = {
     deepThinkModel: process.env.SOMA_DEEP_MODEL || 'sonnet',
   },
 
+  // API authentication
+  // Admin key: passed as X-Soma-Admin-Key header (or Bearer token)
+  adminKey: 'change-me-in-production',
+  // API keys for external integrations
+  apiKeys: [
+    // { key: 'sk-soma-...', name: 'my-claude-integration', userId: 'local', scopes: ['*'] }
+  ],
+  api: {
+    port: 3001,
+    // host: '0.0.0.0'  // uncomment to expose on network
+  },
+
   safety: {
     // Minimum minutes since last user session before autonomous deep-think
     sessionBufferMinutes: 30,

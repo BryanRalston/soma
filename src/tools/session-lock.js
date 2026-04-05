@@ -112,6 +112,21 @@ function registerSession(id, pid, project) {
 }
 
 /**
+ * Update fields on an existing user session (e.g., lastSeen).
+ * @param {string} id - Session identifier
+ * @param {object} updates - Fields to merge into the session entry
+ * @returns {object|null} Updated session, or null if not found
+ */
+function updateSession(id, updates) {
+  const state = readState();
+  const session = state.userSessions.find(s => s.id === id);
+  if (!session) return null;
+  Object.assign(session, updates);
+  _writeState(state);
+  return session;
+}
+
+/**
  * Unregister a user session by ID.
  * @param {string} id - Session identifier to remove
  * @returns {boolean} Whether a session was removed
@@ -437,6 +452,7 @@ module.exports = {
   // New API
   readState,
   registerSession,
+  updateSession,
   unregisterSession,
   getActiveSessions,
   isUserActive,

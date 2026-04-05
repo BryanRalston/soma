@@ -593,6 +593,99 @@ class SomaEngine {
     return sessionNode;
   }
 
+  // ── Goal Management ─────────────────────────────────────────
+
+  /**
+   * Add a new goal, persist to goals.json, update in-memory state.
+   * @param {object} goalData - Goal fields (title required)
+   * @returns {object} The created goal
+   */
+  addGoal(goalData) {
+    const goal = {
+      id: `g-${Date.now()}`,
+      title: goalData.title,
+      description: goalData.description || '',
+      status: goalData.status || 'active',
+      horizon: goalData.horizon || 'medium',
+      tags: goalData.tags || [],
+      created: Date.now(),
+      ...goalData
+    };
+    // Ensure ID is not overridden by spread
+    goal.id = `g-${Date.now()}`;
+
+    if (!Array.isArray(this.goals)) this.goals = [];
+    this.goals.push(goal);
+    this.context.activeGoals = this.goals.filter(g => g.status === 'active');
+
+    try {
+      fs.writeFileSync(GOALS_FILE, JSON.stringify(this.goals, null, 2));
+    } catch (err) {
+      this._log(`Goals save error: ${err.message}`);
+    }
+
+    // Also add to KG
+    this.kg.addNode({
+      id: goal.id,
+      type: 'goal',
+      title: goal.title,
+      body: goal.description,
+      content: goal.description,
+      metadata: {
+        confidence: 1.0,
+        maturity: 'actionable',
+        tags: ['goal', goal.horizon, ...(goal.tags || [])],
+        source: 'api',
+        status: goal.status
+      }
+    });
+
+    return goal;
+  }
+
+  // ── Correction Application ───────────────────────────────────
+
+  /**
+   * Apply a correction: reduce confidence on a node, log to corrections_log.json.
+   * @param {object} correction - { nodeId, originalBelief, evidence, correction, domain, newConfidence }
+   * @returns {object} { correction, updatedNode }
+   */
+  applyCorrection(correction) {
+    const CORRECTIONS_FILE = path.join(DATA_DIR, 'corrections_log.json');
+    const { nodeId, originalBelief, evidence, correctionText, domain, newConfidence } = correction;
+
+    const node = this.kg.getNode(nodeId);
+    if (!node) return { error: `Node ${nodeId} not found` };
+
+    const currentConf = node.metadata?.confidence || 0.7;
+    const updatedConf = newConfidence != null ? newConfidence : Math.max(0.1, currentConf * 0.6);
+
+    this.kg.updateNode(nodeId, {
+      metadata: { ...node.metadata, confidence: updatedConf, flagged: true, correctedAt: Date.now() }
+    });
+
+    const entry = {
+      id: `c-${Date.now()}`,
+      nodeId,
+      originalBelief: originalBelief || node.title,
+      evidence: evidence || '',
+      correction: correctionText || '',
+      domain: domain || 'general',
+      previousConfidence: currentConf,
+      newConfidence: updatedConf,
+      timestamp: Date.now()
+    };
+
+    let log = [];
+    try { log = JSON.parse(fs.readFileSync(CORRECTIONS_FILE, 'utf8')); } catch (_) {}
+    if (!Array.isArray(log)) log = [];
+    log.push(entry);
+    try { fs.writeFileSync(CORRECTIONS_FILE, JSON.stringify(log, null, 2)); } catch (_) {}
+
+    this._log(`Correction applied to ${nodeId}: confidence ${currentConf.toFixed(2)} → ${updatedConf.toFixed(2)}`);
+    return { correction: entry, updatedNode: this.kg.getNode(nodeId) };
+  }
+
   // ── Persistence ─────────────────────────────────────────────
 
   save() {
