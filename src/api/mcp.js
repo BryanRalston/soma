@@ -106,11 +106,11 @@ function buildContextText(engine) {
   return text;
 }
 
-// ── Factory ───────────────────────────────────────────────────
+// ── Per-session McpServer factory ────────────────────────────
+// McpServer can only connect to one transport at a time.
+// Each MCP session gets its own McpServer instance with tools registered.
 
-function createMcpServer(engine) {
-  const sessionLock = require('../tools/session-lock');
-
+function createSessionServer(engine, sessionLock) {
   const mcpServer = new McpServer({
     name: 'soma',
     version: '1.0.0'
@@ -317,10 +317,17 @@ function createMcpServer(engine) {
     }
   );
 
-  // ── Route setup ───────────────────────────────────────────────
+  return mcpServer;
+}
+
+// ── Main factory ─────────────────────────────────────────────
+
+function createMcpServer(engine) {
+  const sessionLock = require('../tools/session-lock');
 
   function setupRoutes(app) {
     // POST /mcp — main JSON-RPC handler
+    // Each new session gets its own McpServer+transport pair
     app.post('/mcp', async (req, res) => {
       const sessionId = req.headers['mcp-session-id'];
 
@@ -328,7 +335,9 @@ function createMcpServer(engine) {
       if (sessionId && transports.has(sessionId)) {
         transport = transports.get(sessionId);
       } else {
-        // New session — create transport
+        // New session — create a fresh McpServer instance + transport
+        const mcpServer = createSessionServer(engine, sessionLock);
+
         transport = new StreamableHTTPServerTransport({
           sessionIdGenerator: () => {
             const id = `mcp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -338,9 +347,7 @@ function createMcpServer(engine) {
         });
 
         transport.onclose = () => {
-          if (transport.sessionId) {
-            transports.delete(transport.sessionId);
-          }
+          if (transport.sessionId) transports.delete(transport.sessionId);
         };
 
         await mcpServer.connect(transport);
@@ -356,21 +363,18 @@ function createMcpServer(engine) {
       }
     });
 
-    // GET /mcp — SSE stream (for clients that open a persistent connection)
+    // GET /mcp — SSE stream for server-initiated messages
     app.get('/mcp', async (req, res) => {
       const sessionId = req.headers['mcp-session-id'];
       if (!sessionId || !transports.has(sessionId)) {
         res.status(400).json({ error: 'No active session. Send POST /mcp first.' });
         return;
       }
-      const transport = transports.get(sessionId);
       try {
-        await transport.handleRequest(req, res);
+        await transports.get(sessionId).handleRequest(req, res);
       } catch (err) {
         console.error('[Soma MCP] SSE error:', err.message);
-        if (!res.headersSent) {
-          res.status(500).json({ error: 'SSE failed', message: err.message });
-        }
+        if (!res.headersSent) res.status(500).json({ error: 'SSE failed', message: err.message });
       }
     });
 
@@ -378,8 +382,7 @@ function createMcpServer(engine) {
     app.delete('/mcp', (req, res) => {
       const sessionId = req.headers['mcp-session-id'];
       if (sessionId && transports.has(sessionId)) {
-        const transport = transports.get(sessionId);
-        transport.close?.();
+        transports.get(sessionId).close?.();
         transports.delete(sessionId);
       }
       res.status(200).json({ ok: true });
@@ -389,7 +392,7 @@ function createMcpServer(engine) {
     console.log('[Soma MCP] Connect with: claude mcp add soma --transport http http://localhost:3001/mcp');
   }
 
-  return { mcpServer, setupRoutes };
+  return { setupRoutes };
 }
 
 module.exports = { createMcpServer };
