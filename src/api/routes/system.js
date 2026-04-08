@@ -7,7 +7,7 @@
 // ============================================================
 
 const express = require('express');
-const { requireAdmin } = require('../auth');
+const { requireApiKey, requireAdmin } = require('../auth');
 const { version } = require('../../../package.json');
 
 module.exports = function systemRoutes(engine) {
@@ -22,8 +22,8 @@ module.exports = function systemRoutes(engine) {
     });
   });
 
-  // GET /status — engine status snapshot
-  router.get('/status', (req, res) => {
+  // GET /status — engine status snapshot (requires API key)
+  router.get('/status', requireApiKey, (req, res) => {
     try {
       const status = engine.status();
       const sessionLock = require('../../tools/session-lock');

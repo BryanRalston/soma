@@ -252,6 +252,41 @@ On first run, Soma detects the empty knowledge graph and runs `src/core/first-bo
 
 ---
 
+## REST API and MCP server
+
+Soma ships with a 45-endpoint REST API and an MCP server so any Claude session can connect to the running engine.
+
+**Start the API server:**
+```bash
+node src/api/server.js
+# Listens on http://localhost:3001/api/v1
+```
+
+**Authentication:** If `adminKey` or `apiKeys` are set in `soma.config.js`, a Bearer token is required on all endpoints except `GET /health`. If neither is set, the server runs in open mode — acceptable for personal localhost use only.
+
+```bash
+# Health check (always public)
+curl http://localhost:3001/api/v1/health
+
+# Status (requires key)
+curl -H "Authorization: Bearer your-api-key" http://localhost:3001/api/v1/status
+
+# Query knowledge graph
+curl -H "Authorization: Bearer your-api-key" \
+  "http://localhost:3001/api/v1/kg/nodes?type=insight&limit=10"
+```
+
+**MCP server (Claude Code integration):**
+```bash
+# Add to Claude Code — requires the same Bearer token as the REST API
+claude mcp add soma --transport http http://localhost:3001/mcp \
+  --header "Authorization: Bearer your-api-key"
+```
+
+Available MCP tools: `soma_briefing`, `soma_query`, `soma_observe`, `soma_context`, `soma_register_session`, `soma_end_session`.
+
+---
+
 ## Design principles
 
 1. **Zero-token layers first.** Most cognition should cost nothing. Layers 2–5 run with no API calls. LLM is a last resort, not a first instinct.

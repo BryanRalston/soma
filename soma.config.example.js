@@ -73,9 +73,13 @@ module.exports = {
   },
 
   // API authentication
-  // Admin key: passed as X-Soma-Admin-Key header (or Bearer token)
-  adminKey: 'change-me-in-production',
-  // API keys for external integrations
+  // Admin key: full access — passed as X-Soma-Admin-Key header or Bearer token.
+  // REQUIRED: set this to a long random string before starting the server.
+  // Generate one with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+  // WARNING: if left as null, the server boots in open mode (no auth required).
+  // That is acceptable for localhost-only personal use, but not for network exposure.
+  adminKey: process.env.SOMA_ADMIN_KEY || null,
+  // API keys for external integrations (e.g. Claude Code MCP connection)
   apiKeys: [
     // { key: 'sk-soma-...', name: 'my-claude-integration', userId: 'local', scopes: ['*'] }
   ],

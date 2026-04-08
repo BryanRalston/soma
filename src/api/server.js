@@ -29,7 +29,8 @@ async function startServer() {
   // Make engine available to routes via app.locals
   app.locals.engine = engine;
 
-  // ── MCP Server (open — no auth required, local use) ─────────
+  // ── MCP Server ───────────────────────────────────────────────
+  // Same auth as the REST API: open if no keys configured, Bearer token otherwise.
   const { createMcpServer } = require('./mcp');
   const { setupRoutes: setupMcpRoutes } = createMcpServer(engine);
   setupMcpRoutes(app);

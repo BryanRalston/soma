@@ -3,7 +3,12 @@
 // Exposes Soma's cognitive capabilities to any MCP-compatible AI assistant.
 //
 // Usage:
-//   claude mcp add soma --transport http http://localhost:3001/mcp
+//   claude mcp add soma --transport http http://localhost:3001/mcp \
+//     --header "Authorization: Bearer your-api-key"
+//
+// If no API keys are configured in soma.config.js, the MCP endpoint is open
+// (localhost-only by default). Once apiKeys or adminKey are set, a valid
+// Bearer token is required.
 //
 // Mount:
 //   const { createMcpServer } = require('./mcp');
@@ -16,6 +21,7 @@ const { StreamableHTTPServerTransport } = require('@modelcontextprotocol/sdk/ser
 const { z } = require('zod');
 const fs = require('fs');
 const path = require('path');
+const { requireApiKey } = require('./auth');
 
 let _config = {};
 try { _config = require('../../soma.config.js'); } catch (_) {}
@@ -328,7 +334,7 @@ function createMcpServer(engine) {
   function setupRoutes(app) {
     // POST /mcp — main JSON-RPC handler
     // Each new session gets its own McpServer+transport pair
-    app.post('/mcp', async (req, res) => {
+    app.post('/mcp', requireApiKey, async (req, res) => {
       const sessionId = req.headers['mcp-session-id'];
 
       let transport;
@@ -364,7 +370,7 @@ function createMcpServer(engine) {
     });
 
     // GET /mcp — SSE stream for server-initiated messages
-    app.get('/mcp', async (req, res) => {
+    app.get('/mcp', requireApiKey, async (req, res) => {
       const sessionId = req.headers['mcp-session-id'];
       if (!sessionId || !transports.has(sessionId)) {
         res.status(400).json({ error: 'No active session. Send POST /mcp first.' });
@@ -379,7 +385,7 @@ function createMcpServer(engine) {
     });
 
     // DELETE /mcp — clean up session
-    app.delete('/mcp', (req, res) => {
+    app.delete('/mcp', requireApiKey, (req, res) => {
       const sessionId = req.headers['mcp-session-id'];
       if (sessionId && transports.has(sessionId)) {
         transports.get(sessionId).close?.();
@@ -389,7 +395,8 @@ function createMcpServer(engine) {
     });
 
     console.log('[Soma MCP] Routes mounted at /mcp (POST, GET, DELETE)');
-    console.log('[Soma MCP] Connect with: claude mcp add soma --transport http http://localhost:3001/mcp');
+    console.log('[Soma MCP] Connect with: claude mcp add soma --transport http http://localhost:3001/mcp \\');
+    console.log('[Soma MCP]   --header "Authorization: Bearer your-api-key"');
   }
 
   return { setupRoutes };
